@@ -3,12 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@dynamic-labs/ethereum": "*",
     "@dynamic-labs/sdk-react-core": "*",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-scripts": "5.0.1",
-    "viem": "*",
-    "@dynamic-labs/ethereum": "*"
+    "viem": "*"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -35,6 +35,7 @@
     ]
   },
   "devDependencies": {
+    "prettier": "3.5.3",
     "web-vitals": "^2.1.4"
   },
   "overrides": {
