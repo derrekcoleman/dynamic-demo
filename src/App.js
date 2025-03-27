@@ -7,6 +7,7 @@ const App = () => (
   <DynamicContextProvider
     theme="auto"
     settings={{
+      // apiBaseUrl: "https://auth.dynamic-demo.xyz/api/v0",
       environmentId: "8005230e-7f6f-472e-bf7b-b0e26b270698",
       walletConnectors: [
         EthereumWalletConnectors,

@@ -11,7 +11,7 @@ import "./Methods.css";
 
 export default function DynamicMethods({ isDarkMode }) {
   const isLoggedIn = useIsLoggedIn();
-  const { sdkHasLoaded, primaryWallet, user } = useDynamicContext();
+  const { sdkHasLoaded, primaryWallet, user, _internal } = useDynamicContext();
   const userWallets = useUserWallets();
   const [isLoading, setIsLoading] = useState(true);
   const [result, setResult] = useState("");
@@ -132,6 +132,32 @@ export default function DynamicMethods({ isDarkMode }) {
     }
   }
 
+  async function showCookieInfo() {
+    try {
+      const authToken = _internal?.getAuthToken?.();
+
+      const cookieInfo = {
+        cookiePresent: !!authToken,
+        tokenType: "HttpOnly",
+        domain: window.location.hostname,
+        tokenLength: authToken ? authToken.length : 0,
+      };
+
+      setResult(safeStringify(cookieInfo));
+    } catch (error) {
+      setResult(
+        JSON.stringify(
+          {
+            cookiePresent: false,
+            error: error.message || "Failed to access token information",
+          },
+          null,
+          2,
+        ),
+      );
+    }
+  }
+
   return (
     <>
       {!isLoading && (
@@ -145,6 +171,9 @@ export default function DynamicMethods({ isDarkMode }) {
             </button>
             <button className="btn btn-primary" onClick={showUserWallets}>
               Fetch User Wallets
+            </button>
+            <button className="btn btn-primary" onClick={showCookieInfo}>
+              Show Cookie Info
             </button>
 
             {primaryWallet && isEthereumWallet(primaryWallet) && (
