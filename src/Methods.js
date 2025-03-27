@@ -5,6 +5,7 @@ import {
   useUserWallets,
 } from "@dynamic-labs/sdk-react-core";
 import { isEthereumWallet } from "@dynamic-labs/ethereum";
+import { encodeFunctionData } from "viem";
 
 import "./Methods.css";
 
@@ -14,6 +15,7 @@ export default function DynamicMethods({ isDarkMode }) {
   const userWallets = useUserWallets();
   const [isLoading, setIsLoading] = useState(true);
   const [result, setResult] = useState("");
+  const [mintStatus, setMintStatus] = useState(null);
 
   const safeStringify = (obj) => {
     const seen = new WeakSet();
@@ -25,6 +27,9 @@ export default function DynamicMethods({ isDarkMode }) {
             return "[Circular]";
           }
           seen.add(value);
+        }
+        if (typeof value === "bigint") {
+          return value.toString();
         }
         return value;
       },
@@ -42,6 +47,7 @@ export default function DynamicMethods({ isDarkMode }) {
 
   function clearResult() {
     setResult("");
+    setMintStatus(null);
   }
 
   function showUser() {
@@ -73,6 +79,59 @@ export default function DynamicMethods({ isDarkMode }) {
     setResult(signature);
   }
 
+  async function mintNFT() {
+    if (!primaryWallet || !isEthereumWallet(primaryWallet)) return;
+
+    try {
+      const publicClient = await primaryWallet.getPublicClient();
+      const walletClient = await primaryWallet.getWalletClient();
+      const address = await walletClient.getAddresses();
+
+      // Encode the safeMint function call
+      const data = encodeFunctionData({
+        abi: [
+          {
+            inputs: [{ name: "to", type: "address" }],
+            name: "safeMint",
+            outputs: [{ name: "", type: "uint256" }],
+            stateMutability: "nonpayable",
+            type: "function",
+          },
+        ],
+        functionName: "safeMint",
+        args: [address[0]],
+      });
+
+      const transaction = {
+        to: "0xBaee5E20983614F8e5Ca0f529896aEC38E6e3ed4", // NFT contract address
+        data,
+      };
+
+      // Send the NFT mint transaction to the blockchain
+      const hash = await walletClient.sendTransaction(transaction);
+      setMintStatus({ status: "pending", hash });
+
+      const receipt = await publicClient.getTransactionReceipt({
+        hash,
+      });
+
+      // Extract relevant information from the receipt
+      const userAddress =
+        "0x" + receipt.logs[2].topics[2].slice(26).toLowerCase();
+      const paymasterAddress =
+        "0x" + receipt.logs[4].topics[3].slice(26).toLowerCase();
+
+      setMintStatus({
+        status: "success",
+        hash,
+        userAddress,
+        paymasterAddress,
+      });
+    } catch (error) {
+      setMintStatus({ status: "error", message: error.message });
+    }
+  }
+
   return (
     <>
       {!isLoading && (
@@ -102,10 +161,51 @@ export default function DynamicMethods({ isDarkMode }) {
                 >
                   Sign "Hello World" on Ethereum
                 </button>
+                <button className="btn btn-primary" onClick={mintNFT}>
+                  Mint NFT
+                </button>
               </>
             )}
           </div>
-          {result && (
+          {mintStatus && (
+            <div className="results-container">
+              <pre className="results-text">
+                {mintStatus.status === "success" && (
+                  <>
+                    NFT successfully minted!{" "}
+                    <a
+                      href={`https://amoy.polygonscan.com/tx/${mintStatus.hash}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      See the blockchain transaction details
+                    </a>
+                    <br />
+                    <br />
+                    NFT owned by your address,{" "}
+                    <a
+                      href={`https://amoy.polygonscan.com/address/${mintStatus.userAddress}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {mintStatus.userAddress}
+                    </a>
+                    <br />
+                    <br />
+                    Transaction fee sponsored by Pimlico at address{" "}
+                    <a
+                      href={`https://amoy.polygonscan.com/address/${mintStatus.paymasterAddress}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {mintStatus.paymasterAddress}
+                    </a>
+                  </>
+                )}
+              </pre>
+            </div>
+          )}
+          {result && !mintStatus && (
             <div className="results-container">
               <pre className="results-text">
                 {result &&
@@ -115,7 +215,7 @@ export default function DynamicMethods({ isDarkMode }) {
               </pre>
             </div>
           )}
-          {result && (
+          {(result || mintStatus) && (
             <div className="clear-container">
               <button className="btn btn-primary" onClick={clearResult}>
                 Clear
