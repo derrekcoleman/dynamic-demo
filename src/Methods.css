@@ -11,47 +11,44 @@
 .methods-container {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
 }
 
 .btn {
-  padding: 10px 15px;
-  margin: 5px;
+  padding: 8px 16px;
+  border-radius: 4px;
   border: none;
-  border-radius: 5px;
   cursor: pointer;
-  font-weight: bold;
-  transition:
-    background-color 0.3s ease,
-    color 0.3s ease;
+  font-size: 14px;
 }
 
 .btn-primary {
-  background-color: #4779fe;
+  background-color: #6b8afd;
   color: white;
 }
 
+.btn-primary:hover {
+  background-color: #5a74d6;
+}
+
 .results-container {
-  justify-content: center;
-  width: 100%;
-  max-width: 800px;
-  padding: 15px;
-  border-radius: 5px;
-  background-color: rgba(0, 0, 0, 0.1);
-  word-wrap: break-word;
+  background-color: #1e1e1e;
+  border-radius: 4px;
+  padding: 20px;
+  margin-bottom: 20px;
   overflow-x: auto;
 }
 
 .results-text {
+  margin: 0;
   white-space: pre-wrap;
   word-break: break-word;
-  max-width: 100%;
 }
 
 .clear-container {
   display: flex;
   justify-content: center;
-  margin-top: 10px;
 }
 
 .dynamic-methods[data-theme="light"] {
@@ -60,8 +57,16 @@
 }
 
 .dynamic-methods[data-theme="dark"] {
-  background-color: #333;
-  color: #f0f0f0;
+  background-color: #2d2d2d;
+  color: #ffffff;
+}
+
+.dynamic-methods[data-theme="dark"] a {
+  color: #6b8afd;
+}
+
+.dynamic-methods[data-theme="dark"] a:visited {
+  color: #9d6bfd;
 }
 
 /* Hover effects */
