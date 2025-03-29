@@ -1,70 +1,51 @@
-# Getting Started with Create React App
+[🔗 Accompanying Google Doc for other written responses](https://docs.google.com/document/d/11eMxDFI9Wqoo0s4WnFeV7ZcQGJHrZjw0JiUKoHgO0ew/edit?usp=sharing)
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# Dynamic Demo App
 
-## Available Scripts
+This project was bootstrapped with [Create Dynamic App](https://docs.dynamic.xyz/example-apps). The commit history has setup notes if you'd like to replicate from scratch.
 
-In the project directory, you can run:
+## Prerequisites
 
-### `npm start`
+- [Node.js and npm](https://nodejs.org/) for the React application
+- [PHP 7.4 or higher](https://www.php.net/downloads) (for the JWT verification API)
+- [Composer](https://getcomposer.org/download/) (for PHP dependencies)
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Local Testing
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+`/src/` contains a React app to render the front end.
 
-### `npm test`
+- Run `npm i` to install dependencies.
+- Run `npm start` to start the front end server.
+- Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+`/api/` contains a PHP server for the back end that verifies JWTs issued by Dynamic.
 
-### `npm run build`
+- Run `./start.sh` from the `/api/` folder to install dependencies and start the server on port 9000.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+# Notes to the Dynamic Team
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Issues and Their Solutions
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### Account Abstraction
 
-### `npm run eject`
+AA paymaster wasn't working until I found a suggestion from Derek in ZeroDev's forum about trying different providers. Apparently only Pimlico works for gas sponsorship on Amoy.
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+- May be worth changing the AA guide to reflect this or use a different chain where things "just work."
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+[Verified NFT contract on Polygon Amoy](https://amoy.polygonscan.com/address/0xBaee5E20983614F8e5Ca0f529896aEC38E6e3ed4#code)
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### Cookie-based Authentication
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+Unfortunately I wasn't able to get cookie-based auth functional in this demo, even after going through the steps to register and validate a domain.
 
-## Learn More
+- I can't enable cookies in Dynamic dashboard until domain is configured, even though I'm on Sandbox.
+- I can't validate domain, even after configuring TXT and CNAME.
+- The domain was validated on the Dynamic dashboard momentarily, but the dashboard seems to "forget" and start the validation process over (with _new_ TXT and CNAME values) when I switch to the cookie tab.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+Related, the "production environment" at https://dynamic-auth.xyz can't get past the login step due to some SSL and other settings errors. The intention was always to create a local-only demo environment; the hosted site only exists as a byproduct of trying to enable cookies.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+### Server-side JWT Verification
 
-### Code Splitting
+This went quite smoothly. I decided to mock a PHP server for the customer's sake.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+I appreciate that the [API references](https://docs.dynamic.xyz/authentication-methods/how-to-validate-users-on-the-backend) include PHP examples!

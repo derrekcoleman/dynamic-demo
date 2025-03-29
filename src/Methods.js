@@ -1,18 +1,16 @@
 import { useState, useEffect } from "react";
 import {
+  getAuthToken,
   useDynamicContext,
   useIsLoggedIn,
-  useUserWallets,
 } from "@dynamic-labs/sdk-react-core";
 import { isEthereumWallet } from "@dynamic-labs/ethereum";
 import { encodeFunctionData } from "viem";
-
 import "./Methods.css";
 
 export default function DynamicMethods({ isDarkMode }) {
   const isLoggedIn = useIsLoggedIn();
-  const { sdkHasLoaded, primaryWallet, user, _internal } = useDynamicContext();
-  const userWallets = useUserWallets();
+  const { sdkHasLoaded, primaryWallet, _internal } = useDynamicContext();
   const [isLoading, setIsLoading] = useState(true);
   const [result, setResult] = useState("");
   const [mintStatus, setMintStatus] = useState(null);
@@ -50,36 +48,31 @@ export default function DynamicMethods({ isDarkMode }) {
     setMintStatus(null);
   }
 
-  function showUser() {
-    setResult(safeStringify(user));
-  }
+  async function verifyJwt() {
+    clearResult();
+    const authToken = getAuthToken();
 
-  function showUserWallets() {
-    setResult(safeStringify(userWallets));
-  }
+    try {
+      const response = await fetch("http://localhost:9000/api", {
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+      });
 
-  async function fetchPublicClient() {
-    if (!primaryWallet || !isEthereumWallet(primaryWallet)) return;
-
-    const publicClient = await primaryWallet.getPublicClient();
-    setResult(safeStringify(publicClient));
-  }
-
-  async function fetchWalletClient() {
-    if (!primaryWallet || !isEthereumWallet(primaryWallet)) return;
-
-    const walletClient = await primaryWallet.getWalletClient();
-    setResult(safeStringify(walletClient));
-  }
-
-  async function signEthereumMessage() {
-    if (!primaryWallet || !isEthereumWallet(primaryWallet)) return;
-
-    const signature = await primaryWallet.signMessage("Hello World");
-    setResult(signature);
+      const verificationResult = await response.json();
+      setResult(safeStringify(verificationResult));
+    } catch (error) {
+      setResult(
+        safeStringify({
+          verified: false,
+          error: error.message || "Failed to verify JWT",
+        }),
+      );
+    }
   }
 
   async function mintNFT() {
+    clearResult();
     if (!primaryWallet || !isEthereumWallet(primaryWallet)) return;
 
     try {
@@ -133,6 +126,7 @@ export default function DynamicMethods({ isDarkMode }) {
   }
 
   async function showCookieInfo() {
+    clearResult();
     try {
       const authToken = _internal?.getAuthToken?.();
 
@@ -166,35 +160,15 @@ export default function DynamicMethods({ isDarkMode }) {
           data-theme={isDarkMode ? "dark" : "light"}
         >
           <div className="methods-container">
-            <button className="btn btn-primary" onClick={showUser}>
-              Fetch User
+            <button className="btn btn-primary" onClick={mintNFT}>
+              Mint NFT
             </button>
-            <button className="btn btn-primary" onClick={showUserWallets}>
-              Fetch User Wallets
+            <button className="btn btn-primary" onClick={verifyJwt}>
+              Verify JWT
             </button>
             <button className="btn btn-primary" onClick={showCookieInfo}>
               Show Cookie Info
             </button>
-
-            {primaryWallet && isEthereumWallet(primaryWallet) && (
-              <>
-                <button className="btn btn-primary" onClick={fetchPublicClient}>
-                  Fetch Public Client
-                </button>
-                <button className="btn btn-primary" onClick={fetchWalletClient}>
-                  Fetch Wallet Client
-                </button>
-                <button
-                  className="btn btn-primary"
-                  onClick={signEthereumMessage}
-                >
-                  Sign "Hello World" on Ethereum
-                </button>
-                <button className="btn btn-primary" onClick={mintNFT}>
-                  Mint NFT
-                </button>
-              </>
-            )}
           </div>
           {mintStatus && (
             <div className="results-container">
@@ -234,7 +208,7 @@ export default function DynamicMethods({ isDarkMode }) {
               </pre>
             </div>
           )}
-          {result && !mintStatus && (
+          {result && (
             <div className="results-container">
               <pre className="results-text">
                 {result &&
